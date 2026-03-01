@@ -1,0 +1,24 @@
+COMANDOS BÁSICOS
+
+Rodar servidor
+python manage.py runserver
+
+Rodar servidor em porta específica
+python manage.py runserver 8001
+
+Aplicar migrations
+python manage.py migrate
+
+Criar migrations
+python manage.py makemigrations
+
+Criar migrations de uma app específica
+python manage.py makemigrations usuarios
+
+Criar usuario admin
+python manage.py createsuperuser
+
+http://localhost:8000/admin
+
+
+venv\Scripts\activate
