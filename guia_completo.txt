@@ -18,7 +18,8 @@ python manage.py makemigrations usuarios
 Criar usuario admin
 python manage.py createsuperuser
 
-http://localhost:8000/admin
+Domínios de vizualização
+http://127.0.0.1:8000/api/v1/cursos/
+http://127.0.0.1:8000/api/v1/avaliacoes/
 
-
-venv\Scripts\activate
+.venv\Scripts\activate
