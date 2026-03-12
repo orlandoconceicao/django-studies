@@ -18,7 +18,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'escola',
     'curso',
-    'rest_framework'
+    'rest_framework',
+    'rest_framework.authtoken', #Auth via token  
 ]
 
 MIDDLEWARE = [
@@ -81,7 +82,8 @@ STATIC_URL = 'static/'
 #DRF
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication'
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly'

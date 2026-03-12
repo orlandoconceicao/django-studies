@@ -23,3 +23,105 @@ http://127.0.0.1:8000/api/v1/cursos/
 http://127.0.0.1:8000/api/v1/avaliacoes/
 
 .venv\Scripts\activate
+
+
+python manage.py makemigrations
+python manage.py migrate
+
+secrets = dfed0dda248143cad83a3c83d992567ee77a66cb
+
+PASSO 1 — SAIR DO SHELL
+
+Se você estiver dentro do shell do Django, saia primeiro para evitar conflitos de importação.
+
+Comando:
+
+exit()
+
+
+
+PASSO 2 — VERIFICAR INSTALLED_APPS
+
+Abra o arquivo settings.py do projeto e verifique se o aplicativo responsável pelos tokens está instalado.
+
+Ele precisa existir dentro de INSTALLED_APPS.
+
+Exemplo:
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    'rest_framework',
+    'rest_framework.authtoken',
+]
+
+Sem isso o Django não cria o modelo Token no banco.
+
+
+
+PASSO 3 — EXECUTAR AS MIGRATIONS
+
+Depois de confirmar que o authtoken está instalado, execute as migrations para criar a tabela Token no banco de dados.
+
+Comando:
+
+python manage.py migrate
+
+Esse comando cria todas as tabelas necessárias que ainda não existem.
+
+
+
+PASSO 4 — ABRIR O SHELL DO DJANGO
+
+Agora abra novamente o shell do Django para executar comandos Python dentro do projeto.
+
+Comando:
+
+python manage.py shell
+
+
+
+PASSO 5 — IMPORTAR AS CLASSES CORRETAS
+
+Dentro do shell importe corretamente o modelo Token e o modelo User.
+
+Imports:
+
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
+
+É importante importar exatamente desse caminho.
+
+
+
+PASSO 6 — PEGAR O USUÁRIO
+
+Agora precisamos buscar o usuário que receberá o token.
+
+Exemplo:
+
+orlando = User.objects.get(username="orlando")
+
+Isso pega o usuário chamado "orlando" no banco de dados.
+
+
+
+PASSO 7 — CRIAR OU OBTER O TOKEN
+
+Agora podemos gerar o token de autenticação para esse usuário.
+
+Comando:
+
+token, created = Token.objects.get_or_create(user=orlando)
+
+print(token.key)
+
+Se o usuário já tiver um token, o Django retorna o mesmo.
+Se não tiver, ele cria um novo.
+
+O valor mostrado em token.key será o token usado para autenticação na API.
