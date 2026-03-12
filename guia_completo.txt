@@ -1,127 +1,440 @@
-COMANDOS BÁSICOS
+==================================================================================
+DJANGO REST FRAMEWORK
+Autor: Orlando Conceição
+==================================================================================
 
-Rodar servidor
+==================================================================================
+OBJETIVO DESTE MATERIAL
+==================================================================================
+
+Este material foi criado para ensinar Django REST Framework de forma clara
+e didática. A ideia é permitir que qualquer pessoa entenda não apenas o código,
+mas também o motivo de cada parte existir dentro do projeto.
+
+O objetivo é que o estudante consiga:
+
+✔ entender como funciona uma API
+✔ aprender a arquitetura do Django
+✔ construir APIs completas
+✔ ensinar outras pessoas
+✔ revisar conceitos rapidamente
+
+==================================================================================
+COMO FUNCIONA UMA API (FLUXO COMPLETO)
+==================================================================================
+
+Fluxo de uma requisição em Django REST Framework
+
+CLIENTE (Browser / App / Postman)
+        ↓
+URL
+        ↓
+VIEW
+        ↓
+SERIALIZER
+        ↓
+MODEL
+        ↓
+BANCO DE DADOS
+
+Depois o caminho retorna:
+
+BANCO DE DADOS
+        ↓
+MODEL
+        ↓
+SERIALIZER
+        ↓
+VIEW
+        ↓
+RESPOSTA JSON
+
+==================================================================================
+MÉTODOS HTTP UTILIZADOS EM APIS
+==================================================================================
+
+GET
+Buscar dados.
+
+POST
+Criar dados.
+
+PUT
+Atualizar completamente.
+
+PATCH
+Atualizar parcialmente.
+
+DELETE
+Remover dados.
+
+==================================================================================
+ESTRUTURA DO PROJETO DJANGO
+==================================================================================
+
+project/
+
+├── manage.py
+│
+├── project/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── cursos/
+│   ├── models.py
+│   ├── serializers.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── admin.py
+│   └── apps.py
+
+==================================================================================
+ARQUIVO: manage.py
+==================================================================================
+
+O arquivo manage.py é responsável por executar comandos administrativos
+do Django.
+
+Ele funciona como um ponto de controle do projeto.
+
+Com ele podemos:
+
+- iniciar o servidor
+- aplicar migrations
+- criar usuários
+- acessar o shell do Django
+
+Sempre que usamos comandos como:
+
 python manage.py runserver
-
-Rodar servidor em porta específica
-python manage.py runserver 8001
-
-Aplicar migrations
 python manage.py migrate
 
-Criar migrations
-python manage.py makemigrations
+estamos utilizando esse arquivo.
 
-Criar migrations de uma app específica
-python manage.py makemigrations usuarios
+CÓDIGO DO ARQUIVO manage.py
 
-Criar usuario admin
-python manage.py createsuperuser
+--------------------------------------------------
 
-Domínios de vizualização
-http://127.0.0.1:8000/api/v1/cursos/
-http://127.0.0.1:8000/api/v1/avaliacoes/
+import os
+import sys
 
-.venv\Scripts\activate
+def main():
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'setup.settings')
+    try:
+        from django.core.management import execute_from_command_line
+    except ImportError:
+        raise
+    execute_from_command_line(sys.argv)
 
+if __name__ == '__main__':
+    main()
 
-python manage.py makemigrations
-python manage.py migrate
+--------------------------------------------------
 
-secrets = dfed0dda248143cad83a3c83d992567ee77a66cb
+==================================================================================
+ARQUIVO: settings.py
+==================================================================================
+
+Este é o arquivo de configuração principal do Django.
+
+Ele controla praticamente todo o comportamento do sistema.
+
+Entre as configurações mais importantes estão:
+
+- banco de dados
+- aplicativos instalados
+- segurança
+- middleware
+- autenticação
+
+Sempre que instalamos uma nova biblioteca ela deve ser adicionada
+na lista INSTALLED_APPS.
+
+CÓDIGO PRINCIPAL DO settings.py
+
+--------------------------------------------------
+
+INSTALLED_APPS = [
+
+'django.contrib.admin',
+'django.contrib.auth',
+'django.contrib.contenttypes',
+'django.contrib.sessions',
+'django.contrib.messages',
+'django.contrib.staticfiles',
+
+'rest_framework',
+'rest_framework.authtoken',
+
+'cursos'
+
+]
+
+--------------------------------------------------
+
+==================================================================================
+ARQUIVO: models.py
+==================================================================================
+
+O arquivo models.py define as tabelas do banco de dados.
+
+Cada classe criada dentro desse arquivo representa uma tabela.
+
+Cada atributo da classe representa uma coluna.
+
+Exemplo de model:
+
+--------------------------------------------------
+
+from django.db import models
+
+class Curso(models.Model):
+
+    titulo = models.CharField(max_length=200)
+    url = models.URLField()
+
+    def __str__(self):
+        return self.titulo
+
+--------------------------------------------------
+
+Explicação dos campos
+
+titulo
+Campo de texto limitado a 200 caracteres.
+
+url
+Campo utilizado para armazenar links.
+
+__str__
+Define como o objeto será exibido no painel administrativo.
+
+==================================================================================
+ARQUIVO: serializers.py
+==================================================================================
+
+Serializers convertem dados entre:
+
+Python → JSON
+JSON → Python
+
+Isso é necessário porque APIs trabalham com JSON.
+
+CÓDIGO DO SERIALIZER
+
+--------------------------------------------------
+
+from rest_framework import serializers
+from .models import Curso
+
+class CursoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Curso
+        fields = '__all__'
+
+--------------------------------------------------
+
+Explicação
+
+ModelSerializer cria automaticamente todos os campos
+baseados no model.
+
+Isso reduz muito a quantidade de código.
+
+==================================================================================
+ARQUIVO: views.py
+==================================================================================
+
+O arquivo views.py contém a lógica da API.
+
+Ele recebe requisições, consulta o banco de dados
+e retorna respostas.
+
+CÓDIGO DO VIEWSET
+
+--------------------------------------------------
+
+from rest_framework import viewsets
+from .models import Curso
+from .serializers import CursoSerializer
+
+class CursoViewSet(viewsets.ModelViewSet):
+
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
+
+--------------------------------------------------
+
+Explicação
+
+queryset
+Define quais dados serão retornados.
+
+serializer_class
+Define qual serializer será utilizado.
+
+ModelViewSet cria automaticamente um CRUD completo.
+
+==================================================================================
+ARQUIVO: urls.py
+==================================================================================
+
+Este arquivo conecta as rotas da API com as views.
+
+Ele define quais endpoints estarão disponíveis.
+
+CÓDIGO
+
+--------------------------------------------------
+
+from rest_framework.routers import DefaultRouter
+from .views import CursoViewSet
+
+router = DefaultRouter()
+
+router.register(r'cursos', CursoViewSet)
+
+urlpatterns = router.urls
+
+--------------------------------------------------
+
+Isso cria automaticamente as rotas:
+
+/cursos/
+/cursos/1/
+
+==================================================================================
+ARQUIVO: admin.py
+==================================================================================
+
+Esse arquivo registra os models no painel administrativo.
+
+CÓDIGO
+
+--------------------------------------------------
+
+from django.contrib import admin
+from .models import Curso
+
+admin.site.register(Curso)
+
+--------------------------------------------------
+
+Depois disso o model Curso aparecerá no painel admin.
+
+==================================================================================
+AUTENTICAÇÃO POR TOKEN
+==================================================================================
+
+A autenticação por token é usada para proteger APIs.
+
+Cada usuário recebe um token único.
+
+Esse token deve ser enviado em todas as requisições.
+
+Exemplo de header
+
+Authorization: Token 123456789
+
+==================================================================================
+CRIANDO TOKEN MANUALMENTE
+==================================================================================
 
 PASSO 1 — SAIR DO SHELL
 
-Se você estiver dentro do shell do Django, saia primeiro para evitar conflitos de importação.
-
-Comando:
-
 exit()
 
+----------------------------------------------------------------------------------
 
-
-PASSO 2 — VERIFICAR INSTALLED_APPS
-
-Abra o arquivo settings.py do projeto e verifique se o aplicativo responsável pelos tokens está instalado.
-
-Ele precisa existir dentro de INSTALLED_APPS.
-
-Exemplo:
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-
-    'rest_framework',
-    'rest_framework.authtoken',
-]
-
-Sem isso o Django não cria o modelo Token no banco.
-
-
-
-PASSO 3 — EXECUTAR AS MIGRATIONS
-
-Depois de confirmar que o authtoken está instalado, execute as migrations para criar a tabela Token no banco de dados.
-
-Comando:
-
-python manage.py migrate
-
-Esse comando cria todas as tabelas necessárias que ainda não existem.
-
-
-
-PASSO 4 — ABRIR O SHELL DO DJANGO
-
-Agora abra novamente o shell do Django para executar comandos Python dentro do projeto.
-
-Comando:
+PASSO 2 — ABRIR SHELL
 
 python manage.py shell
 
+----------------------------------------------------------------------------------
 
-
-PASSO 5 — IMPORTAR AS CLASSES CORRETAS
-
-Dentro do shell importe corretamente o modelo Token e o modelo User.
-
-Imports:
+PASSO 3 — IMPORTAR MODELS
 
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 
-É importante importar exatamente desse caminho.
+----------------------------------------------------------------------------------
 
-
-
-PASSO 6 — PEGAR O USUÁRIO
-
-Agora precisamos buscar o usuário que receberá o token.
-
-Exemplo:
+PASSO 4 — PEGAR USUÁRIO
 
 orlando = User.objects.get(username="orlando")
 
-Isso pega o usuário chamado "orlando" no banco de dados.
+----------------------------------------------------------------------------------
 
-
-
-PASSO 7 — CRIAR OU OBTER O TOKEN
-
-Agora podemos gerar o token de autenticação para esse usuário.
-
-Comando:
+PASSO 5 — CRIAR TOKEN
 
 token, created = Token.objects.get_or_create(user=orlando)
 
 print(token.key)
 
-Se o usuário já tiver um token, o Django retorna o mesmo.
-Se não tiver, ele cria um novo.
+==================================================================================
+COMANDOS IMPORTANTES DO DJANGO
+==================================================================================
 
-O valor mostrado em token.key será o token usado para autenticação na API.
+Rodar servidor
+
+python manage.py runserver
+
+--------------------------------------------------
+
+Rodar servidor em porta específica
+
+python manage.py runserver 8001
+
+--------------------------------------------------
+
+Criar migrations
+
+python manage.py makemigrations
+
+--------------------------------------------------
+
+Aplicar migrations
+
+python manage.py migrate
+
+--------------------------------------------------
+
+Criar usuário administrador
+
+python manage.py createsuperuser
+
+--------------------------------------------------
+
+Ativar ambiente virtual
+
+.venv\Scripts\activate
+
+==================================================================================
+ENDPOINTS DE TESTE
+==================================================================================
+
+http://127.0.0.1:8000/api/v1/cursos/
+
+http://127.0.0.1:8000/api/v1/avaliacoes/
+
+==================================================================================
+CHECKLIST FINAL
+==================================================================================
+
+✔ projeto Django criado
+✔ aplicação criada
+✔ models criados
+✔ serializers funcionando
+✔ views configuradas
+✔ urls registradas
+✔ migrations aplicadas
+✔ autenticação configurada
+✔ endpoints funcionando
+
+==================================================================================
+FIM DO ARQUIVO
+==================================================================================
