@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'curso',
     'rest_framework',
     'rest_framework.authtoken', #Auth via token  
+    
 ]
 
 MIDDLEWARE = [
